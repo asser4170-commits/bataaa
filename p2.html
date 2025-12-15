@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>asser's compitition</title>
+  <link href="p.css" rel="stylesheet">
+</head>
+
+<body class="pody">
+  <div class="g8">
+    <a href="index.html" class="btn">home</a>
+    <a href="p3.html" class="btn">questoins</a>
+     <a href="save.html" class="btn">add</a>
+  </div>
+
+  <div class="login-div">
+    <h2 style="text-align:center; margin-bottom: 20px;">Login Info</h2>
+
+    <label>Name:</label>
+    <input type="text" id="name">
+    <label>Male or Female:</label>
+    <select id="gender">
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+    </select>
+
+    <label>Birthday:</label>
+    <input type="date" id="birthday">
+    <div id="ageError" style="color: red; font-size: 14px;"></div>
+
+    <label>Password:</label>
+    <input type="password" id="password">
+
+    <button class='btn black' onclick="saveInfo()">Submit</button>
+  </div>
+
+  <script>
+    function saveInfo() {
+      const name = document.getElementById("name").value.trim();
+      const gender = document.getElementById("gender").value;
+      const birthday = document.getElementById("birthday").value;
+      const password = document.getElementById("password").value;
+
+      if (!name || !birthday || !password) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      // Calculate age
+      const today = new Date();
+      const birthDate = new Date(birthday);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      const ageError = document.getElementById("ageError");
+      if (age < 10) {
+        ageError.textContent = "You are under 10. Please enter a different birthday.";
+        return;
+      } else {
+        ageError.textContent = "";
+      }
+
+      const data = {
+        name,
+        gender,
+        birthday,
+        password
+      };
+
+      localStorage.setItem("loginInfo", JSON.stringify(data));
+      alert("Saved successfully");
+      window.location.href = "index.html"; // Redirect after login
+    }
+
+    // Allow access to login page for re-login
+  </script>
+
+</body>
+</html>
+
+
+
+
+

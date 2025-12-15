@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Questions</title>
+  <link href="p.css" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+</head>
+<body class="asso">
+
+  <div class="g8">
+    <a href="index.html" class="btn">home</a>
+    <a href="p3.html" class="btn">quiz</a>
+    <button class="btn" onclick="logout()">logout</button>
+  </div>
+
+  <div class="add-box" id="addForm">
+    <h3>Add a Question</h3>
+    <p style="font-size: 12px; color: red;">Please ensure questions and options are appropriate for grade 8 students. No inappropriate language or content.</p>
+    <label>Category:</label>
+    <select id="category">
+      <option value="General">General</option>
+      <option value="Math">Math</option>
+      <option value="Science">Science</option>
+      <option value="History">History</option>
+      <option value="English">English</option>
+    </select>
+    <label>Difficulty:</label>
+    <select id="difficulty">
+      <option value="Easy">Easy</option>
+      <option value="Medium">Medium</option>
+      <option value="Hard">Hard</option>
+    </select>
+    <label>Question:</label><input type="text" id="qText">
+    <label>Option 1:</label><input type="text" id="opt1">
+    <label>Option 2:</label><input type="text" id="opt2">
+    <label>Option 3:</label><input type="text" id="opt3">
+    <label>Option 4:</label><input type="text" id="opt4">
+    <label>Correct Option (1-4):</label>
+    <select id="correct">
+      <option value="0">1</option>
+      <option value="1">2</option>
+      <option value="2">3</option>
+      <option value="3">4</option>
+    </select>
+    <label><input type="checkbox" id="agree"> I agree that the content is appropriate</label>
+    <button class="btn" onclick="previewQuestion()">Preview</button>
+    <button class="btn" id="saveBtn" onclick="saveQuestion()">Save Question</button>
+  </div>
+
+<script>
+function logout() {
+    localStorage.removeItem("loginInfo");
+    window.location.href = "p2.html";
+}
+
+if (!localStorage.getItem("loginInfo")) {
+    window.location.href = "p2.html";
+}
+
+// Your web app's Firebase configuration - REPLACE WITH YOUR OWN
+const firebaseConfig = {
+  apiKey: "your-api-key",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "your-app-id"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+window.db = db;
+
+async function saveQuestion() {
+    const category = document.getElementById("category").value;
+    const difficulty = document.getElementById("difficulty").value;
+    const qText = document.getElementById("qText").value.trim();
+    const opt1 = document.getElementById("opt1").value.trim();
+    const opt2 = document.getElementById("opt2").value.trim();
+    const opt3 = document.getElementById("opt3").value.trim();
+    const opt4 = document.getElementById("opt4").value.trim();
+    const correct = parseInt(document.getElementById("correct").value);
+    const agree = document.getElementById("agree").checked;
+
+    if (!agree) {
+        alert("Please agree that the content is appropriate.");
+        return;
+    }
+
+    if (!qText.endsWith('?')) {
+        alert("Question must end with a question mark.");
+        return;
+    }
+
+    const whWords = ['who', 'what', 'when', 'where', 'why', 'how'];
+    const lowerText = qText.toLowerCase();
+    const hasWh = whWords.some(word => lowerText.includes(word));
+    if (!hasWh) {
+        alert("Question must contain at least one W.H. word: who, what, when, where, why, or how.");
+        return;
+    }
+
+    // Basic profanity check
+    const badWords = ["badword1", "badword2", "inappropriate", "offensive"]; // Add more as needed
+    const allText = (qText + opt1 + opt2 + opt3 + opt4).toLowerCase();
+    for (let word of badWords) {
+        if (allText.includes(word)) {
+            alert("Please use appropriate language. Avoid inappropriate words.");
+            return;
+        }
+    }
+
+    const question = {
+        category,
+        difficulty,
+        text: qText,
+        options: [opt1, opt2, opt3, opt4],
+        correct: correct
+    };
+
+    // Check for duplicate - but since shared, perhaps skip or handle
+    // For now, allow duplicates
+
+    if (window.db) {
+        try {
+            await window.db.collection("questions").add(question);
+            alert("Question saved to shared database!");
+        } catch (error) {
+            alert("Error saving to database: " + error.message + ". Saving locally instead.");
+            // fallback to local
+            let questions = JSON.parse(localStorage.getItem("questions") || "[]");
+            questions.push(question);
+            localStorage.setItem("questions", JSON.stringify(questions));
+            alert("Question saved locally!");
+        }
+    } else {
+        // local
+        let questions = JSON.parse(localStorage.getItem("questions") || "[]");
+        questions.push(question);
+        localStorage.setItem("questions", JSON.stringify(questions));
+        alert("Question saved locally!");
+    }
+
+    // Clear form
+    document.getElementById("category").value = "General";
+    document.getElementById("difficulty").value = "Easy";
+    document.getElementById("qText").value = "";
+    document.getElementById("opt1").value = "";
+    document.getElementById("opt2").value = "";
+    document.getElementById("opt3").value = "";
+    document.getElementById("opt4").value = "";
+    document.getElementById("correct").value = "0";
+    document.getElementById("agree").checked = false;
+}
+
+function previewQuestion() {
+    const category = document.getElementById("category").value;
+    const difficulty = document.getElementById("difficulty").value;
+    const qText = document.getElementById("qText").value.trim();
+    const opt1 = document.getElementById("opt1").value.trim();
+    const opt2 = document.getElementById("opt2").value.trim();
+    const opt3 = document.getElementById("opt3").value.trim();
+    const opt4 = document.getElementById("opt4").value.trim();
+    const correct = parseInt(document.getElementById("correct").value);
+
+    if (!qText || !opt1 || !opt2 || !opt3 || !opt4) {
+        alert("Fill all fields to preview");
+        return;
+    }
+
+    const preview = `Category: ${category}\nDifficulty: ${difficulty}\nQuestion: ${qText}\nOptions:\n1. ${opt1}\n2. ${opt2}\n3. ${opt3}\n4. ${opt4}\nCorrect: ${correct + 1}`;
+    alert("Preview:\n" + preview);
+}
+</script>
+</body>
+</html>

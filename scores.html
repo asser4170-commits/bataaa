@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scores</title>
+  <link href="p.css" rel="stylesheet" />
+  <style>
+    body { padding: 16px; }
+    pre { background:#f6f6f6; padding:8px; border-radius:6px; }
+    .btn { margin-right:8px; }
+  </style>
+</head>
+<body>
+  <div style="margin-bottom:12px;">
+    <a href="p3.html" class="btn">Back to Quiz</a>
+    <button id="refreshBtn" class="btn">Refresh</button>
+    <button id="clearBtn" class="btn">Clear Scores</button>
+    <button id="exportBtn" class="btn">Export JSON</button>
+  </div>
+
+  <h2>All Scores</h2>
+  <div id="scoresList">Loading...</div>
+
+  <script>
+    function render() {
+      const container = document.getElementById('scoresList');
+      const scores = JSON.parse(localStorage.getItem('scores') || '{}');
+      const entries = Object.entries(scores || {}).sort((a,b)=>b[1]-a[1]);
+      if (entries.length === 0) {
+        container.innerHTML = '<p>No scores yet.</p>';
+        return;
+      }
+      let html = '<ol>';
+      for (const [user,score] of entries) {
+        html += '<li><strong>' + user + '</strong>: ' + score + '</li>';
+      }
+      html += '</ol>';
+      container.innerHTML = html;
+    }
+    document.getElementById('refreshBtn').addEventListener('click', render);
+    document.getElementById('clearBtn').addEventListener('click', ()=>{
+      if (!confirm('Clear all stored scores?')) return;
+      localStorage.removeItem('scores');
+      render();
+    });
+    document.getElementById('exportBtn').addEventListener('click', ()=>{
+      const data = localStorage.getItem('scores') || '{}';
+      const blob = new Blob([data], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'scores.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+    render();
+  </script>
+</body>
+</html>

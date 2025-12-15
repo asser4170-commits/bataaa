@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>asser's compitition</title>
+    <link  rel="stylesheet" href="p.css">
+</head>
+<body class="back">
+<div class="link">
+    <button class="btn" onclick="logout()">logout</button>
+    <a href="p3.html" class="btn">quiz</a>
+    <a href="save.html" class="btn">add</a>
+</div>    
+<div class="spacer"></div>
+<div class="p" >
+    <h1 class="h1" id="greeting"> goo</h1>
+    <h2 id="greeting"></h2>
+     <div class="linkor"></div>
+      <div class="madiv"></div>
+       <h3 class="">here you will be asked questoins</h3>
+      <h3 class="">and you can get a score how easy is that</h3>
+     <img src="group-school-kids-raising-hands-classroom-education-elementary-learning-people-concept-teacher-sitting-58762358.webp" alt="image" class="pic" >
+    <h2 class="A">MADE by ASSER KARIM </h2>
+    <h2 class="A3">GRADE 8</h2>
+</div>
+<script>
+function logout() {
+    localStorage.removeItem("loginInfo");
+    window.location.href = "p2.html";
+}
+
+if (!localStorage.getItem("loginInfo")) {
+    window.location.href = "p2.html";
+} else {
+    const data = JSON.parse(localStorage.getItem("loginInfo"));
+    document.getElementById("greeting").textContent = "Hello " + data.name;
+}
+</script>
+</body>
+
+</html>
+
